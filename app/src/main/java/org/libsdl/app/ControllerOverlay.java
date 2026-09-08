@@ -1,6 +1,8 @@
 package org.libsdl.app;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.InputDevice;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -10,9 +12,13 @@ import android.widget.RelativeLayout;
 
 import org.ikemen_engine.ikemen_go.R;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 public class ControllerOverlay extends RelativeLayout {
@@ -93,10 +99,10 @@ public class ControllerOverlay extends RelativeLayout {
         float y = event.getY(index);
 
         if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN) {
-            // Check Joysticks first
-            if (isViewAtLocation(findViewById(R.id.left_analog), x, y)) {
+            // Check Joysticks first (circular capture with configurable leniency)
+            if (isStickAt(findViewById(R.id.left_analog), x, y)) {
                 leftJoyPointerId = pId;
-            } else if (isViewAtLocation(findViewById(R.id.right_analog), x, y)) {
+            } else if (isStickAt(findViewById(R.id.right_analog), x, y)) {
                 rightJoyPointerId = pId;
             } else {
                 // If not a stick, it's a button/dpad
@@ -136,7 +142,7 @@ public class ControllerOverlay extends RelativeLayout {
             }
         }
 
-        updateDpadState(event);
+        // D-Pad removed. Left analog stick is the only movement input.
         return true;
     }
 
@@ -205,7 +211,7 @@ public class ControllerOverlay extends RelativeLayout {
             SDLControllerManager.onNativeJoy(virtualDeviceId, axis, pressed ? 1.0f : 0.0f);
         }
         else if (code >= 1000) {
-            // D-PAD visuals only (Logic remains in updateDpadState)
+            // D-Pad removed; only triggers and standard buttons reach here.
         }
         else { // STANDARD BUTTONS
             if (pressed) {
@@ -234,14 +240,6 @@ public class ControllerOverlay extends RelativeLayout {
             case 103: viewId = R.id.btn_z; break;
             case 108: viewId = R.id.btn_start; break;
             case 109: viewId = R.id.btn_back; break;
-            case 1001: viewId = R.id.dp_up; break;
-            case 1002: viewId = R.id.dp_down; break;
-            case 1003: viewId = R.id.dp_left; break;
-            case 1004: viewId = R.id.dp_right; break;
-//            case 1005: viewId = R.id.dp_upleft; break;
-//            case 1006: viewId = R.id.dp_downright; break;
-//            case 1007: viewId = R.id.dp_downleft; break;
-//            case 1008: viewId = R.id.dp_upright; break;
             case 4004: viewId = R.id.btn_w; break;
             case 4005: viewId = R.id.btn_c; break;
         }
@@ -252,70 +250,6 @@ public class ControllerOverlay extends RelativeLayout {
         }
     }
 
-    private void updateDpadState(MotionEvent event) {
-        int newX = 0, newY = 0;
-        int action = event.getActionMasked();
-
-        if (action != MotionEvent.ACTION_UP && action != MotionEvent.ACTION_CANCEL) {
-            View container = findViewById(R.id.dpad_container);
-            if (container == null) return;
-
-            // Use Local coordinates to match event.getX()
-            float centerX = container.getLeft() + (container.getWidth() / 2f);
-            float centerY = container.getTop() + (container.getHeight() / 2f);
-            float radius = container.getWidth() / 2f;
-
-            for (int i = 0; i < event.getPointerCount(); i++) {
-                if (action == MotionEvent.ACTION_POINTER_UP && i == event.getActionIndex()) continue;
-
-                float x = event.getX(i);
-                float y = event.getY(i);
-
-                // Calculate distance from center (Pythagoras)
-                float dx = x - centerX;
-                float dy = y - centerY;
-                float distance = (float) Math.sqrt(dx * dx + dy * dy);
-
-                // Only process if the finger is actually touching the D-Pad area
-                // (with  a small "deadzone" in the middle so neutral is easy to hit)
-                if (distance > (radius * 0.2f) && distance < (radius * 1.5f)) {
-                    // Calculate angle in degrees (0 to 360)
-                    double angle = Math.toDegrees(Math.atan2(dy, dx));
-                    if (angle < 0) angle += 360;
-
-                    // Map angle to 8 directions with wider diagonals
-                    // Cardinals get 30 degrees, Diagonals get 60 degrees
-                    if (angle >= 345 || angle < 15)        newX = 1;  // Right (Narrower)
-                    else if (angle >= 15  && angle < 75)   { newX = 1; newY = 1; }   // Down-Right (Wider)
-                    else if (angle >= 75  && angle < 105)  newY = 1; // Down
-                    else if (angle >= 105 && angle < 165)  { newX = -1; newY = 1; }  // Down-Left
-                    else if (angle >= 165 && angle < 195)  newX = -1; // Left
-                    else if (angle >= 195 && angle < 255)  { newX = -1; newY = -1; } // Up-Left
-                    else if (angle >= 255 && angle < 285)  newY = -1; // Up
-                    else if (angle >= 285 && angle < 345)  { newX = 1; newY = -1; }  // Up-Right
-
-                    // Map angle to 8 directions
-//                    if (angle >= 337.5 || angle < 22.5)   newX = 1;  // Right
-//                    else if (angle >= 22.5  && angle < 67.5)  { newX = 1; newY = 1; }   // Down-Right
-//                    else if (angle >= 67.5  && angle < 112.5) newY = 1; // Down
-//                    else if (angle >= 112.5 && angle < 157.5) { newX = -1; newY = 1; }  // Down-Left
-//                    else if (angle >= 157.5 && angle < 202.5) newX = -1; // Left
-//                    else if (angle >= 202.5 && angle < 247.5) { newX = -1; newY = -1; } // Up-Left
-//                    else if (angle >= 247.5 && angle < 292.5) newY = -1; // Up
-//                    else if (angle >= 292.5 && angle < 337.5) { newX = 1; newY = -1; }  // Up-Right
-
-                    break; // One finger is enough for the D-pad
-                }
-            }
-        }
-
-        if (newX != hatX || newY != hatY) {
-            hatX = newX;
-            hatY = newY;
-            SDLControllerManager.onNativeHat(virtualDeviceId, 0, hatX, hatY);
-            updateDpadVisual(hatX, hatY);
-        }
-    }
 
     private int dpToPx(int dp) {
         float density = getContext().getResources().getDisplayMetrics().density;
@@ -364,11 +298,28 @@ public class ControllerOverlay extends RelativeLayout {
         }
     }
 
-    private void updateDpadVisual(int hX, int hY) {
-        findViewById(R.id.dp_up).setPressed(hY == -1);
-        findViewById(R.id.dp_down).setPressed(hY == 1);
-        findViewById(R.id.dp_left).setPressed(hX == -1);
-        findViewById(R.id.dp_right).setPressed(hX == 1);
+
+    // Circular capture test for the analog sticks: true when the finger
+    // starts within the stick base radius (with grab leniency) so the thumb
+    // doesn't need to land exactly on the base center.
+    private boolean isStickAt(View v, float x, float y) {
+        if (v == null || v.getVisibility() != View.VISIBLE) return false;
+
+        int[] vLoc = new int[2];
+        v.getLocationOnScreen(vLoc); // Global position of button
+
+        int[] parentLoc = new int[2];
+        this.getLocationOnScreen(parentLoc); // Global position of the overlay
+
+        float cx = (vLoc[0] - parentLoc[0]) + v.getWidth() / 2f;
+        float cy = (vLoc[1] - parentLoc[1]) + v.getHeight() / 2f;
+        float radius = Math.min(v.getWidth(), v.getHeight()) / 2f;
+
+        float leniency = 1.75f;
+        if (v instanceof JoystickOverlay) leniency = ((JoystickOverlay) v).getGrabLeniency();
+
+        float dx = x - cx, dy = y - cy;
+        return (dx * dx + dy * dy) <= (radius * leniency) * (radius * leniency);
     }
 
     // Helper to check if a finger is inside a specific button's area
@@ -422,6 +373,8 @@ public class ControllerOverlay extends RelativeLayout {
         android.util.Log.i("ControllerOverlay", String.format("DEBUG: virtualDeviceID = %d", virtualDeviceId));
         SDLControllerManager.nativeRemoveJoystick(virtualDeviceId);
         ensureJoystickAlive();
+        applyStickConfig(findViewById(R.id.left_analog));
+        applyStickConfig(findViewById(R.id.right_analog));
         // Initialize the joysticks
         JoystickOverlay ls = findViewById(R.id.left_analog);
         ls.setAttrs(virtualDeviceId, 0, 1);
@@ -440,5 +393,87 @@ public class ControllerOverlay extends RelativeLayout {
 
     private int ensureJoystickAlive() {
         return SDLControllerManager.nativeAddJoystick(virtualDeviceId, "Xbox 360 Controller", "Gamepad", 0x045E, 0x028E, false, 0xFFF, 6, 0x3F, 1, 0);
+    }
+
+    // --------------- Analog stick configuration ---------------
+    //
+    // The left analog stick (movement) replaces the old D-Pad and is fully
+    // configurable at runtime. Values are resolved in this order:
+    //   1. <files-dir>/virtual_controller.ini  (user-editable INI)
+    //   2. SharedPreferences ("virtual_controller")
+    //   3. Built-in defaults (God-of-War style large left stick)
+    //
+    // INI example (Android/data/org.ikemen_engine.ikemen_go/files/virtual_controller.ini):
+    //   stick_size         = 190   ; base diameter in dp (90..300)
+    //   stick_x            = 55    ; left margin in dp
+    //   stick_y            = 5     ; bottom margin in dp
+    //   deadzone           = 0.15  ; fraction of full deflection (0..0.5)
+    //   grab_leniency      = 1.75  ; capture radius multiplier around the base
+    private void applyStickConfig(View v) {
+        if (v == null) return;
+        Context ctx = getContext();
+        float sizeDp = 170f, xDp = 40f, yDp = 55f, deadzone = 0.15f, grab = 1.75f;
+
+        // 2) SharedPreferences
+        SharedPreferences sp = ctx.getSharedPreferences("virtual_controller",
+                Context.MODE_PRIVATE);
+        sizeDp = sp.getFloat("stick_size", sizeDp);
+        xDp = sp.getFloat("stick_x", xDp);
+        yDp = sp.getFloat("stick_y", yDp);
+        deadzone = sp.getFloat("deadzone", deadzone);
+        grab = sp.getFloat("grab_leniency", grab);
+
+        // 1) INI file overrides
+        try {
+            File ini = new File(ctx.getExternalFilesDir(null), "virtual_controller.ini");
+            if (ini.isFile()) {
+                InputStream in = new FileInputStream(ini);
+                Properties pr = new Properties();
+                pr.load(in);
+                in.close();
+                sizeDp = parse(pr.getProperty("stick_size"), sizeDp);
+                xDp = parse(pr.getProperty("stick_x"), xDp);
+                yDp = parse(pr.getProperty("stick_y"), yDp);
+                deadzone = parse(pr.getProperty("deadzone"), deadzone);
+                grab = parse(pr.getProperty("grab_leniency"), grab);
+            }
+        } catch (Exception e) {
+            Log.w("ControllerOverlay", "stick config not read: " + e);
+        }
+
+        // Clamp to sane ranges; deadzone/grab are per-view semantics handled below
+        sizeDp = clamp(sizeDp, 90f, 300f);
+        deadzone = clamp(deadzone, 0f, 0.5f);
+        grab = clamp(grab, 1f, 3f);
+
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) v.getLayoutParams();
+        float density = ctx.getResources().getDisplayMetrics().density;
+        lp.width = Math.round(sizeDp * density);
+        lp.height = lp.width;
+        lp.setMargins(Math.round(xDp * density), 0, 0, Math.round(yDp * density));
+        v.setLayoutParams(lp);
+
+        // Pass stick tuning to the overlay view itself.
+        if (v instanceof JoystickOverlay) {
+            JoystickOverlay joy = (JoystickOverlay) v;
+            joy.setDeadzone(deadzone);
+            joy.setGrabLeniency(grab);
+        }
+        Log.i("ControllerOverlay", String.format(
+                "stick config: size=%.1fdp x=%.1f y=%.1f deadzone=%.2f grab=%.2f",
+                sizeDp, xDp, yDp, deadzone, grab));
+    }
+
+    private static float parse(String s, float dflt) {
+        if (s == null) return dflt;
+        try {
+            return Float.parseFloat(s.trim());
+        } catch (NumberFormatException e) {
+            return dflt;
+        }
+    }
+
+    private static float clamp(float v, float min, float max) {
+        return v < min ? min : (v > max ? max : v);
     }
 }

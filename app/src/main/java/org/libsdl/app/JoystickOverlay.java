@@ -13,6 +13,12 @@ import org.ikemen_engine.ikemen_go.R;
 public class JoystickOverlay extends View {
     private int deviceId = 0, axisX = 0, axisY = 0;
     private float centerX, centerY, stickX, stickY, radius;
+    // Analog deadzone as a fraction of full deflection. Inside it the stick
+    // reports neutral; outside, the response is rescaled so full deflection
+    // still reaches 1.0 (no loss of range).
+    private float deadzone = 0.15f;
+    // Extra capture area around the base (1.0 = view bounds exactly).
+    private float grabLeniency = 1.75f;
 
     public JoystickOverlay(Context context) {
         super(context);
@@ -54,6 +60,31 @@ public class JoystickOverlay extends View {
         this.axisY = axisY;
     }
 
+    public void setDeadzone(float dz) {
+        deadzone = Math.max(0f, Math.min(0.5f, dz));
+    }
+
+    public void setGrabLeniency(float g) {
+        grabLeniency = Math.max(1f, Math.min(3f, g));
+    }
+
+    public float getGrabLeniency() {
+        return grabLeniency;
+    }
+
+    // Applies a rounded deadzone to the raw normalized vector.
+    private void applyDeadzone(float[] v) {
+        float mag = (float) Math.sqrt(v[0] * v[0] + v[1] * v[1]);
+        if (mag <= deadzone) {
+            v[0] = 0f;
+            v[1] = 0f;
+            return;
+        }
+        float scaled = (mag - deadzone) / (1f - deadzone);
+        v[0] = v[0] / mag * scaled;
+        v[1] = v[1] / mag * scaled;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // Provide a default size (200px) if none is specified
@@ -79,10 +110,11 @@ public class JoystickOverlay extends View {
     }
 
     public void sendToSDL(float normX, float normY) {
-        if (!isInEditMode()) {
-            SDLControllerManager.onNativeJoy(deviceId, axisX, normX);
-            SDLControllerManager.onNativeJoy(deviceId, axisY, normY);
-        }
+        if (isInEditMode()) return;
+        float[] v = new float[]{normX, normY};
+        applyDeadzone(v);
+        SDLControllerManager.onNativeJoy(deviceId, axisX, v[0]);
+        SDLControllerManager.onNativeJoy(deviceId, axisY, v[1]);
     }
 
     @Override

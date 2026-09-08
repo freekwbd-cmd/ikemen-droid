@@ -5,67 +5,17 @@
     android:layout_height="match_parent"
     android:splitMotionEvents="true">
 
-    <RelativeLayout
-        android:id="@+id/dpad_container"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="50dp"
-        android:layout_marginBottom="55dp"
-        android:splitMotionEvents="true"
-        android:background="@drawable/round_button"
-        android:backgroundTint="#88FFFFFF">
-
-        <Button android:id="@+id/dp_up" android:text="↑"
-            android:layout_width="50dp" android:layout_height="50dp"
-            android:layout_centerHorizontal="true" android:layout_alignParentTop="true"
-            android:alpha="0.5"
-            android:background="#00000000"/>
-<!--        <Button android:id="@+id/dp_upleft" android:text="↖"-->
-<!--            android:layout_width="50dp" android:layout_height="50dp"-->
-<!--            android:layout_centerHorizontal="true" android:layout_alignParentTop="true"-->
-<!--            android:layout_alignParentLeft="true"-->
-<!--            android:alpha="0.5" />-->
-        <Button android:id="@+id/dp_left" android:text="←"
-            android:layout_width="50dp" android:layout_height="50dp"
-            android:layout_centerVertical="true" android:layout_alignParentLeft="true"
-            android:alpha="0.5"
-            android:background="#00000000"/>
-<!--        <Button android:id="@+id/dp_downleft" android:text="↙"-->
-<!--            android:layout_width="50dp" android:layout_height="50dp"-->
-<!--            android:layout_centerVertical="true" android:layout_alignParentLeft="true"-->
-<!--            android:layout_alignParentBottom="true"-->
-<!--            android:alpha="0.5"/>-->
-        <Button android:id="@+id/dp_down" android:text="↓"
-            android:layout_width="50dp" android:layout_height="50dp"
-            android:layout_centerHorizontal="true" android:layout_alignParentBottom="true"
-            android:alpha="0.5"
-            android:background="#00000000"/>
-<!--        <Button android:id="@+id/dp_downright" android:text="↘"-->
-<!--            android:layout_width="50dp" android:layout_height="50dp"-->
-<!--            android:layout_centerHorizontal="true" android:layout_alignParentBottom="true"-->
-<!--            android:layout_alignParentRight="true"-->
-<!--            android:alpha="0.5"/>-->
-        <Button android:id="@+id/dp_right" android:text="→"
-            android:layout_width="50dp" android:layout_height="50dp"
-            android:layout_centerVertical="true" android:layout_alignParentRight="true"
-            android:alpha="0.5"
-            android:background="#00000000"/>
-<!--        <Button android:id="@+id/dp_upright" android:text="↗"-->
-<!--            android:layout_width="50dp" android:layout_height="50dp"-->
-<!--            android:layout_centerVertical="true" android:layout_alignParentRight="true"-->
-<!--            android:layout_alignParentTop="true"-->
-<!--            android:alpha="0.5"/>-->
-    </RelativeLayout>
-
+    <!-- D-Pad removed. The movement input is now the single large analog
+         stick below (God-of-War style). Size/position are runtime-configurable
+         (virtual_controller.ini in the app files dir or SharedPreferences). -->
     <org.libsdl.app.JoystickOverlay
         android:id="@+id/left_analog"
-        android:layout_width="125dp"
-        android:layout_height="125dp"
-        android:layout_toRightOf="@id/dpad_container"
-        android:layout_alignTop="@id/dpad_container"
-        android:layout_marginLeft="34dp"
+        android:layout_width="170dp"
+        android:layout_height="170dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="40dp"
+        android:layout_marginBottom="55dp"
         app:axisX="0" app:axisY="1" />
 
     <RelativeLayout
