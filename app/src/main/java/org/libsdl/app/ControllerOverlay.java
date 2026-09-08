@@ -225,8 +225,33 @@ public class ControllerOverlay extends RelativeLayout {
             }
         }
 
+        // Keyboard fallback (duplicate-safe: engine ignores repeated press)
+        int key = keyFallbackFor(code);
+        if (key != -1) {
+            if (pressed) SDLActivity.onNativeKeyDown(key);
+            else SDLActivity.onNativeKeyUp(key);
+        }
+
         // Always update visuals
         updateButtonVisual(code, pressed);
+    }
+
+    // Fallback keyboard mapping so touch buttons always register in the
+    // engine even when SDL never opens the virtual gamepad as a controller.
+    // Codes follow the engine's default keyboard layout (Keys_P1).
+    private int keyFallbackFor(int code) {
+        switch (code) {
+            case 96:  return 54; // BUTTON_A  -> engine 'a' = z
+            case 97:  return 52; // BUTTON_B  -> engine 'b' = x
+            case 99:  return 29; // BUTTON_X  -> engine 'x' = a
+            case 100: return 47; // BUTTON_Y  -> engine 'y' = s
+            case 102: return 45; // BUTTON_D/LB -> engine 'd' = q
+            case 103: return 32; // BUTTON_Z/RB -> engine 'z' = d
+            case 108: return 66; // START     -> RETURN
+            case 4004: return 51; // W trigger -> engine 'w' = w
+            case 4005: return 31; // C trigger -> engine 'c' = c
+            default:  return -1;
+        }
     }
 
     private void updateButtonVisual(int code, boolean pressed) {
