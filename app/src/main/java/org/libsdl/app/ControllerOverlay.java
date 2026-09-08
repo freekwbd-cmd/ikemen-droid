@@ -206,16 +206,16 @@ public class ControllerOverlay extends RelativeLayout {
     private void handleInput(final int code, boolean pressed) {
         if (code == -1) return;
 
-        if (code >= 4000) { // TRIGGERS
-            int axis = code - 4000;
-            SDLControllerManager.onNativeJoy(virtualDeviceId, axis, pressed ? 1.0f : 0.0f);
+        if (code >= 4000) { // TRIGGERS (W/C): keyboard fallback only.
+            // Sending a transient axis event here previously froze the engine's
+            // key-remap screen (remap polls axes; a stale held trigger axis
+            // makes it loop). Triggers are handled purely by keyFallbackFor().
         }
         else if (code >= 1000) {
-            // D-Pad removed; only triggers and standard buttons reach here.
+            // D-Pad removed; these codes are never produced.
         }
         else { // STANDARD BUTTONS
             if (pressed) {
-                SDLControllerManager.onNativeHat(virtualDeviceId, 0, hatX, hatY);
                 int result = SDLControllerManager.onNativePadDown(virtualDeviceId, code);
                 if (result < 0) {
                     android.util.Log.e("SDL", "INPUT FAILURE: Device " + virtualDeviceId + " rejected button " + code);
