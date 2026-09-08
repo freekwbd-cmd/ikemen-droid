@@ -206,10 +206,13 @@ public class ControllerOverlay extends RelativeLayout {
     private void handleInput(final int code, boolean pressed) {
         if (code == -1) return;
 
-        if (code >= 4000) { // TRIGGERS (W/C): keyboard fallback only.
-            // Sending a transient axis event here previously froze the engine's
-            // key-remap screen (remap polls axes; a stale held trigger axis
-            // makes it loop). Triggers are handled purely by keyFallbackFor().
+        if (code >= 4000) { // TRIGGERS (W/C): analog axis events only.
+            // The engine's joystick key-remap polls axes (getJoystickKey),
+            // so triggers must arrive as axis values. Press -> 1.0,
+            // release -> 0.0. No keyboard fallback for triggers: the earlier
+            // freeze happened when BOTH paths fired while remapping.
+            int axis = code - 4000;
+            SDLControllerManager.onNativeJoy(virtualDeviceId, axis, pressed ? 1.0f : 0.0f);
         }
         else if (code >= 1000) {
             // D-Pad removed; these codes are never produced.
@@ -225,8 +228,10 @@ public class ControllerOverlay extends RelativeLayout {
             }
         }
 
-        // Keyboard fallback (duplicate-safe: engine ignores repeated press)
-        int key = keyFallbackFor(code);
+        // Keyboard fallback (duplicate-safe: engine ignores repeated press).
+        // Not applied to triggers (>=4000): remap screen polls axes only and
+        // a simultaneous fake keyboard press froze that path.
+        int key = code >= 4000 ? -1 : keyFallbackFor(code);
         if (key != -1) {
             if (pressed) SDLActivity.onNativeKeyDown(key);
             else SDLActivity.onNativeKeyUp(key);
@@ -248,8 +253,6 @@ public class ControllerOverlay extends RelativeLayout {
             case 102: return 45; // BUTTON_D/LB -> engine 'd' = q
             case 103: return 32; // BUTTON_Z/RB -> engine 'z' = d
             case 108: return 66; // START     -> RETURN
-            case 4004: return 51; // W trigger -> engine 'w' = w
-            case 4005: return 31; // C trigger -> engine 'c' = c
             default:  return -1;
         }
     }

@@ -20,70 +20,73 @@
 
     <RelativeLayout
         android:id="@+id/button_grid"
-        android:layout_width="320dp"
-        android:layout_height="220dp"
+        android:layout_width="250dp"
+        android:layout_height="150dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginRight="10dp"
-        android:layout_marginBottom="55dp"
+        android:layout_marginRight="18dp"
+        android:layout_marginBottom="70dp"
         android:splitMotionEvents="true">
 
-        <Button android:id="@+id/btn_w" android:text="W"
+        <!-- Top attack row (staggered for diagonal ergonomics) -->
+        <Button android:id="@+id/btn_z" android:text="Z"
             android:layout_width="55dp" android:layout_height="55dp"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:background="@drawable/round_button" />
 
-        <Button android:id="@+id/btn_z" android:text="Z"
-            android:layout_width="55dp" android:layout_height="55dp"
-            android:layout_toLeftOf="@id/btn_w"
-            android:layout_marginRight="2dp"
-            android:background="@drawable/round_button" />
-
         <Button android:id="@+id/btn_y" android:text="Y"
             android:layout_width="55dp" android:layout_height="55dp"
             android:layout_toLeftOf="@id/btn_z"
-            android:layout_marginTop="25dp"
-            android:layout_marginRight="2dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginTop="6dp"
             android:background="@drawable/round_button" />
 
         <Button android:id="@+id/btn_x" android:text="X"
             android:layout_width="55dp" android:layout_height="55dp"
             android:layout_toLeftOf="@id/btn_y"
-            android:layout_marginTop="45dp"
-            android:layout_marginRight="2dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginTop="14dp"
             android:background="@drawable/round_button" />
 
-        <Button android:id="@+id/btn_d" android:text="D"
-            android:layout_width="55dp" android:layout_height="55dp"
-            android:layout_alignParentRight="true"
-            android:layout_below="@id/btn_w"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/round_button" />
-
+        <!-- Bottom row aligned under each top button -->
         <Button android:id="@+id/btn_c" android:text="C"
             android:layout_width="55dp" android:layout_height="55dp"
-            android:layout_toLeftOf="@id/btn_d"
-            android:layout_alignTop="@id/btn_d"
-            android:layout_marginRight="2dp"
+            android:layout_alignLeft="@id/btn_z"
+            android:layout_below="@id/btn_z"
+            android:layout_marginTop="10dp"
             android:background="@drawable/round_button" />
 
         <Button android:id="@+id/btn_b" android:text="B"
             android:layout_width="55dp" android:layout_height="55dp"
-            android:layout_toLeftOf="@id/btn_c"
-            android:layout_alignTop="@id/btn_c"
-            android:layout_marginTop="20dp"
-            android:layout_marginRight="2dp"
+            android:layout_alignLeft="@id/btn_y"
+            android:layout_below="@id/btn_y"
+            android:layout_marginTop="10dp"
             android:background="@drawable/round_button" />
 
         <Button android:id="@+id/btn_a" android:text="A"
             android:layout_width="55dp" android:layout_height="55dp"
-            android:layout_toLeftOf="@id/btn_b"
-            android:layout_alignTop="@id/btn_b"
-            android:layout_marginTop="28dp"
-            android:layout_marginRight="2dp"
+            android:layout_alignLeft="@id/btn_x"
+            android:layout_below="@id/btn_x"
+            android:layout_marginTop="10dp"
             android:background="@drawable/round_button" />
     </RelativeLayout>
+
+    <!-- Shoulder/trigger buttons (W = LT, D = LB, kept smaller, under the grid) -->
+    <Button android:id="@+id/btn_w" android:text="W"
+        android:layout_width="48dp" android:layout_height="48dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="18dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/round_button" />
+
+    <Button android:id="@+id/btn_d" android:text="D"
+        android:layout_width="48dp" android:layout_height="48dp"
+        android:layout_toLeftOf="@id/btn_w"
+        android:layout_alignBottom="@id/btn_w"
+        android:layout_marginRight="6dp"
+        android:background="@drawable/round_button" />
 
     <org.libsdl.app.JoystickOverlay
         android:id="@+id/right_analog"
