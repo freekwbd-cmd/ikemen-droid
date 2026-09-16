@@ -123,6 +123,28 @@
             android:gravity="center"
             android:maxLines="2"
             android:ellipsize="end" />
+
+        <Button
+            android:id="@+id/btn_install_theme"
+            android:layout_width="260dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="12dp"
+            android:text="INSTALL PIASH THEME"
+            android:textColor="#FFD700"
+            android:textSize="16sp"
+            android:fontFamily="@font/yagami"
+            android:textStyle="bold|italic"
+            android:background="@drawable/piash_menu_button" />
+
+        <TextView
+            android:id="@+id/tv_theme_status"
+            android:layout_width="260dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text=""
+            android:textColor="#888888"
+            android:textSize="11sp"
+            android:gravity="center" />
     </LinearLayout>
 
     <!-- THE KING OF FIGHTERS label bottom-left -->

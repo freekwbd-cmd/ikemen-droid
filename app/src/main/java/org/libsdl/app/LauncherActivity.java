@@ -15,6 +15,14 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import java.io.File;
+import java.io.InputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.List;
 import org.ikemen_engine.ikemen_go.R;
 
 /**
@@ -29,6 +37,8 @@ public class LauncherActivity extends Activity {
     private Button mStartButton;
     private Button mFolderButton;
     private TextView mFolderPathText;
+    private Button mThemeButton;
+    private TextView mThemeStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +57,12 @@ public class LauncherActivity extends Activity {
         mStartButton = findViewById(R.id.btn_start_game);
         mFolderButton = findViewById(R.id.btn_select_folder);
         mFolderPathText = findViewById(R.id.tv_folder_path);
+        mThemeButton = findViewById(R.id.btn_install_theme);
+        mThemeStatus = findViewById(R.id.tv_theme_status);
+
+        mThemeButton.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { installPiashMugenTheme(); }
+        });
 
         mFolderButton.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { checkAndPickFolder(); }
@@ -86,7 +102,95 @@ public class LauncherActivity extends Activity {
         startActivity(intent);
     }
 
+
+    private void installPiashMugenTheme() {
+        String folder = getSavedFolder();
+        if (folder == null || folder.isEmpty()) {
+            mThemeStatus.setText("Select a game folder first");
+            return;
+        }
+        try {
+            // Copy motif files from assets to game folder
+            copyAssetDir("piashmugen", new File(folder, "data/piashmugen"));
+            // Update save/config.ini Motif setting
+            File configFile = new File(folder, "save/config.ini");
+            updateConfigMotif(configFile, "data/piashmugen/system.def");
+            mThemeStatus.setText("PIASH MUGEN theme installed!");
+            mThemeStatus.setTextColor(0xFF66FF66);
+        } catch (Exception e) {
+            mThemeStatus.setText("Install failed: " + e.getMessage());
+            mThemeStatus.setTextColor(0xFFFF6666);
+        }
+    }
+
+    private void copyAssetDir(String assetPath, File destDir) throws Exception {
+        String[] files = getAssets().list(assetPath);
+        if (!destDir.exists()) destDir.mkdirs();
+        if (files == null || files.length == 0) return;
+        for (String f : files) {
+            String subPath = assetPath + "/" + f;
+            File outFile = new File(destDir, f);
+            String[] sub = getAssets().list(subPath);
+            if (sub != null && sub.length > 0) {
+                copyAssetDir(subPath, outFile);
+            } else {
+                InputStream in = getAssets().open(subPath);
+                OutputStream out = new FileOutputStream(outFile);
+                byte[] buf = new byte[8192];
+                int len;
+                while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+                in.close(); out.close();
+            }
+        }
+    }
+
+    private void updateConfigMotif(File configFile, String motifPath) throws Exception {
+        List<String> lines = new ArrayList<>();
+        boolean inOptions = false;
+        boolean motifSet = false;
+        if (configFile.exists()) {
+            BufferedReader br = new BufferedReader(new FileReader(configFile));
+            String line;
+            while ((line = br.readLine()) != null) {
+                String t = line.trim();
+                if (t.startsWith("[") && t.endsWith("]")) {
+                    inOptions = t.equalsIgnoreCase("[Options]");
+                }
+                if (inOptions && t.toLowerCase().startsWith("motif")) {
+                    int eq = line.indexOf('=');
+                    if (eq >= 0) {
+                        line = line.substring(0, eq + 1) + " " + motifPath;
+                        motifSet = true;
+                    }
+                }
+                lines.add(line);
+            }
+            br.close();
+        }
+        if (!motifSet) {
+            // Add [Options] section or append Motif
+            boolean hasOptions = false;
+            for (int i = 0; i < lines.size(); i++) {
+                if (lines.get(i).trim().equalsIgnoreCase("[Options]")) {
+                    hasOptions = true;
+                    lines.add(i + 1, "Motif = " + motifPath);
+                    break;
+                }
+            }
+            if (!hasOptions) {
+                lines.add("[Options]");
+                lines.add("Motif = " + motifPath);
+            }
+        }
+        File parent = configFile.getParentFile();
+        if (parent != null && !parent.exists()) parent.mkdirs();
+        FileWriter fw = new FileWriter(configFile);
+        for (String l : lines) fw.write(l + "\n");
+        fw.close();
+    }
+
     // ---- Folder picker (same logic as SDLActivity) ----
+
 
     public void checkAndPickFolder() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

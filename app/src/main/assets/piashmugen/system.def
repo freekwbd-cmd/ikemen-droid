@@ -1,0 +1,71 @@
+; PIASH MUGEN - Cinematic fighting-game motif for Ikemen GO
+; Install: copy the piashmugen folder into your game folder's data/ directory,
+; then set Motif = data/piashmugen/system.def in your config.
+; Only overrides title/menu styling; everything else falls back to defaults.
+
+[Info]
+name = "PIASH MUGEN"
+author = "PIASH"
+versiondate = 09,16,2026
+mugenversion = 1.0
+localcoord = 320, 240
+
+[Files]
+spr =
+snd =
+select = select.def
+fight = fight.def
+font10 = yagami.def
+font10.height = 18
+
+;---------------------------------------------------------------------
+; Title screen / main menu
+;---------------------------------------------------------------------
+[Title Info]
+fadein.time = 10
+fadein.col = 0, 0, 0
+fadeout.time = 10
+fadeout.col = 0, 0, 0
+
+; Hide default "MAIN MENU" header text (logo comes from artwork)
+title.font = -1, 0, 0, 255, 255, 255, 255, -1
+title.text =
+
+; Main menu: right side, aggressive italic, Yagami font
+menu.pos = 245, 105
+menu.item.font = yagami.def, 0, 1, 210, 210, 210, 255, -1
+menu.item.active.font = yagami.def, 0, 1, 255, 64, 64, 255, -1
+menu.item.spacing = 0, 17
+menu.item.xshear = -0.18
+menu.item.active.xshear = -0.18
+menu.item.uppercase = 1
+
+; Red glow cursor behind selected item
+menu.boxcursor.visible = 1
+menu.boxcursor.coords = -70, -11, 10, 3
+menu.boxcursor.col = 200, 20, 20
+menu.boxcursor.pulse = 40, 25, 40
+
+; Menu entries (order = display order)
+menu.itemname.arcade = ARCADE
+menu.itemname.versus = VS MODE
+menu.itemname.teamversus = TEAM VS
+menu.itemname.teamcoop = TEAM CO-OP
+menu.itemname.survival = SURVIVAL
+menu.itemname.training = TRAINING
+menu.itemname.watch = WATCH
+menu.itemname.options = OPTIONS
+menu.itemname.exit = EXIT
+
+; Footer branding
+footer.title.font = yagami.def, 0, 1, 255, 255, 255, 255, -1
+footer.title.text = PIASH MUGEN GO
+footer.info.font = yagami.def, 0, 0, 255, 90, 90, 255, -1
+footer.info.text = BLOOD AWAKENS THE REAL POWER
+footer.version.font = yagami.def, 0, -1, 170, 170, 170, 255, -1
+footer.version.text = MUGEN ENGINE
+footer.overlay.col = 16, 0, 0
+footer.overlay.alpha = 255, 120
+
+[TitleBgDef]
+bgclearcolor = 10, 0, 0

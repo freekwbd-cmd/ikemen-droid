@@ -1,0 +1,12 @@
+[FNT v2]
+fntversion = 2,00
+name = "Yagami"
+author = "PIASH MUGEN"
+
+[Def]
+Type = truetype
+Size = 0,18
+Spacing = 1,2
+Offset = 0,0
+File = yagami.ttf
+Blend = 1
