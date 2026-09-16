@@ -368,18 +368,21 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
         // Acquire WiFi multicast lock so UDP broadcast beacons (LAN discovery)
         // are received even when the WiFi driver would otherwise filter them.
-        try {
-            android.net.wifi.WifiManager wifiManager =
-                (android.net.wifi.WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-            if (wifiManager != null) {
-                mMulticastLock = wifiManager.createMulticastLock("ikemen-lan-discovery");
-                mMulticastLock.setReferenceCounted(true);
-                mMulticastLock.acquire();
-                Log.v(TAG, "WiFi multicast lock acquired for LAN discovery");
+        // Done on a background thread to avoid blocking onCreate.
+        new Thread(() -> {
+            try {
+                android.net.wifi.WifiManager wifiManager =
+                    (android.net.wifi.WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                if (wifiManager != null) {
+                    mMulticastLock = wifiManager.createMulticastLock("ikemen-lan-discovery");
+                    mMulticastLock.setReferenceCounted(true);
+                    mMulticastLock.acquire();
+                    Log.v(TAG, "WiFi multicast lock acquired for LAN discovery");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to acquire WiFi multicast lock: " + e.getMessage());
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to acquire WiFi multicast lock: " + e.getMessage());
-        }
+        }, "MulticastLock").start();
 
         mSharedPrefs = this.getSharedPreferences(getString(R.string.prefs_key), MODE_PRIVATE);
 
@@ -658,6 +661,44 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         startActivityForResult(intent, FOLDER_PICKER_CODE);
     }
 
+    // Pref key prefix for the asset-check version stamp. The game folder path hash
+    // is appended so switching game folders re-triggers the CRC check.
+    private static final String PREF_ASSET_CHECK_VC = "asset_check_version_code_";
+    // Cached APK version code (avoids repeated PackageManager IPC).
+    private static int sApkVersionCode = -2;
+
+    private int getApkVersionCode() {
+        if (sApkVersionCode == -2) {
+            sApkVersionCode = -1;
+            try {
+                if (android.os.Build.VERSION.SDK_INT >= 28) {
+                    sApkVersionCode = (int) getPackageManager()
+                            .getPackageInfo(getPackageName(), 0).getLongVersionCode();
+                } else {
+                    sApkVersionCode = getPackageManager()
+                            .getPackageInfo(getPackageName(), 0).versionCode;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to get APK version code: " + e.getMessage());
+            }
+        }
+        return sApkVersionCode;
+    }
+
+    private boolean assetCheckStampValid(File baseDir) {
+        int vc = getApkVersionCode();
+        if (vc == -1) return false;
+        String key = PREF_ASSET_CHECK_VC + baseDir.getAbsolutePath().hashCode();
+        return mSharedPrefs.getInt(key, -1) == vc;
+    }
+
+    private void saveAssetCheckStamp(File baseDir) {
+        int vc = getApkVersionCode();
+        if (vc == -1) return;
+        String key = PREF_ASSET_CHECK_VC + baseDir.getAbsolutePath().hashCode();
+        mSharedPrefs.edit().putInt(key, vc).apply();
+    }
+
     private boolean filesNeedUpdate(File baseDir, String[] dirsToCheck) {
         try {
             // List all files in the APK's directories to check
@@ -693,7 +734,19 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
         // Run the comparison in the background
         new Thread(() -> {
-            boolean updateRequired = filesNeedUpdate(baseDir, UPDATE_FILE_CHECK_DIRS);
+            boolean updateRequired;
+            if (assetCheckStampValid(baseDir)) {
+                // APK hasn't changed since the last successful check: skip the
+                // CRC32 verification entirely for a faster startup.
+                Log.i("SDLActivity", "APK unchanged since last asset check. Skipping CRC verification.");
+                updateRequired = false;
+            } else {
+                updateRequired = filesNeedUpdate(baseDir, UPDATE_FILE_CHECK_DIRS);
+                if (!updateRequired) {
+                    // CRCs match; remember so we can skip the check next launch.
+                    saveAssetCheckStamp(baseDir);
+                }
+            }
 
             if (!updateRequired) {
                 Log.i("SDLActivity", "Scripts match APK. Skipping extraction.");
@@ -713,6 +766,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                     new Thread(() -> {
                         try {
                             AssetExtractor.extractAll(getAssets(), baseDir);
+                            saveAssetCheckStamp(baseDir);
                             runOnUiThread(() -> {
                                 progress.dismiss();
                                 onSDLReady();
