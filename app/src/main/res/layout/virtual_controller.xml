@@ -35,7 +35,8 @@
             android:layout_alignParentTop="true"
             android:background="@drawable/round_button"
             android:textColor="#FF6666"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/yagami" />
 
         <Button android:id="@+id/btn_y" android:text="Y"
             android:layout_width="55dp" android:layout_height="55dp"
@@ -44,7 +45,8 @@
             android:layout_marginTop="6dp"
             android:background="@drawable/round_button"
             android:textColor="#FF6666"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/yagami" />
 
         <Button android:id="@+id/btn_x" android:text="X"
             android:layout_width="55dp" android:layout_height="55dp"
@@ -53,7 +55,8 @@
             android:layout_marginTop="14dp"
             android:background="@drawable/round_button"
             android:textColor="#FF6666"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/yagami" />
 
         <!-- Bottom row aligned under each top button -->
         <Button android:id="@+id/btn_c" android:text="C"
@@ -63,7 +66,8 @@
             android:layout_marginTop="10dp"
             android:background="@drawable/round_button"
             android:textColor="#FF6666"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/yagami" />
 
         <Button android:id="@+id/btn_b" android:text="B"
             android:layout_width="55dp" android:layout_height="55dp"
@@ -72,7 +76,8 @@
             android:layout_marginTop="10dp"
             android:background="@drawable/round_button"
             android:textColor="#FF6666"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/yagami" />
 
         <Button android:id="@+id/btn_a" android:text="A"
             android:layout_width="55dp" android:layout_height="55dp"
@@ -81,7 +86,8 @@
             android:layout_marginTop="10dp"
             android:background="@drawable/round_button"
             android:textColor="#FF6666"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/yagami" />
     </RelativeLayout>
 
     <!-- Shoulder/trigger buttons (W = LT, D = LB, kept smaller, under the grid) -->
@@ -93,7 +99,8 @@
         android:layout_marginBottom="16dp"
         android:background="@drawable/round_button"
             android:textColor="#FF6666"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/yagami" />
 
     <Button android:id="@+id/btn_d" android:text="D"
         android:layout_width="48dp" android:layout_height="48dp"
@@ -102,7 +109,8 @@
         android:layout_marginRight="6dp"
         android:background="@drawable/round_button"
             android:textColor="#FF6666"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/yagami" />
 
     <org.libsdl.app.JoystickOverlay
         android:id="@+id/right_analog"
@@ -123,10 +131,12 @@
         android:splitMotionEvents="true">
         <Button android:clickable="true" android:focusable="true" android:id="@+id/btn_back" android:text="Menu" android:layout_width="55dp" android:layout_height="55dp" android:background="@drawable/round_button"
             android:textColor="#FF6666"
-            android:textStyle="bold" android:layout_margin="5dp" />
+            android:textStyle="bold"
+            android:fontFamily="@font/yagami" android:layout_margin="5dp" />
         <Button android:clickable="true" android:focusable="true" android:id="@+id/btn_start" android:text="Start" android:layout_width="55dp" android:layout_height="55dp" android:background="@drawable/round_button"
             android:textColor="#FF6666"
-            android:textStyle="bold" android:layout_margin="5dp" />
+            android:textStyle="bold"
+            android:fontFamily="@font/yagami" android:layout_margin="5dp" />
     </LinearLayout>
 
 </RelativeLayout>
