@@ -97,7 +97,22 @@ public class LauncherActivity extends Activity {
         }
     }
 
+    private void ensureThemeApplied() {
+        try {
+            String folder = getSavedFolder();
+            if (folder == null || folder.isEmpty()) return;
+            File sysDef = new File(folder, "data/piashmugen/system.def");
+            if (!sysDef.exists()) return;
+            File configFile = new File(folder, "save/config.ini");
+            String current = readConfigMotif(configFile);
+            if (current == null || !current.contains("piashmugen")) {
+                updateConfigMotif(configFile, "data/piashmugen/system.def");
+            }
+        } catch (Exception ignored) {}
+    }
+
     private void launchGame() {
+        ensureThemeApplied();
         Intent intent = new Intent(this, SDLActivity.class);
         startActivity(intent);
     }
@@ -107,32 +122,69 @@ public class LauncherActivity extends Activity {
         String folder = getSavedFolder();
         if (folder == null || folder.isEmpty()) {
             mThemeStatus.setText("Select a game folder first");
+            mThemeStatus.setTextColor(0xFFFF6666);
             return;
         }
         try {
             // Copy motif files from assets to game folder
-            copyAssetDir("piashmugen", new File(folder, "data/piashmugen"));
+            File themeDir = new File(folder, "data/piashmugen");
+            int copied = copyAssetDir("piashmugen", themeDir);
+            // Verify critical files
+            File sysDef = new File(themeDir, "system.def");
+            File ttf = new File(themeDir, "font/yagami.ttf");
+            if (!sysDef.exists()) {
+                mThemeStatus.setText("Install failed: system.def not copied");
+                mThemeStatus.setTextColor(0xFFFF6666);
+                return;
+            }
             // Update save/config.ini Motif setting
             File configFile = new File(folder, "save/config.ini");
             updateConfigMotif(configFile, "data/piashmugen/system.def");
-            mThemeStatus.setText("PIASH MUGEN theme installed!");
-            mThemeStatus.setTextColor(0xFF66FF66);
+            // Verify config was written
+            String motifInConfig = readConfigMotif(configFile);
+            if (motifInConfig != null && motifInConfig.contains("piashmugen")) {
+                mThemeStatus.setText("PIASH MUGEN theme installed! (" + copied + " files)");
+                mThemeStatus.setTextColor(0xFF66FF66);
+            } else {
+                mThemeStatus.setText("Files copied but config not updated");
+                mThemeStatus.setTextColor(0xFFFFAA00);
+            }
         } catch (Exception e) {
             mThemeStatus.setText("Install failed: " + e.getMessage());
             mThemeStatus.setTextColor(0xFFFF6666);
         }
     }
 
-    private void copyAssetDir(String assetPath, File destDir) throws Exception {
+    private String readConfigMotif(File configFile) throws Exception {
+        if (!configFile.exists()) return null;
+        BufferedReader br = new BufferedReader(new FileReader(configFile));
+        String line;
+        boolean inOptions = false;
+        try {
+            while ((line = br.readLine()) != null) {
+                String t = line.trim();
+                if (t.startsWith("[") && t.endsWith("]")) {
+                    inOptions = t.equalsIgnoreCase("[Options]");
+                } else if (inOptions && t.toLowerCase().startsWith("motif")) {
+                    int eq = t.indexOf('=');
+                    if (eq >= 0) return t.substring(eq + 1).trim();
+                }
+            }
+        } finally { br.close(); }
+        return null;
+    }
+
+    private int copyAssetDir(String assetPath, File destDir) throws Exception {
+        int count = 0;
         String[] files = getAssets().list(assetPath);
         if (!destDir.exists()) destDir.mkdirs();
-        if (files == null || files.length == 0) return;
+        if (files == null || files.length == 0) return count;
         for (String f : files) {
             String subPath = assetPath + "/" + f;
             File outFile = new File(destDir, f);
             String[] sub = getAssets().list(subPath);
             if (sub != null && sub.length > 0) {
-                copyAssetDir(subPath, outFile);
+                count += copyAssetDir(subPath, outFile);
             } else {
                 InputStream in = getAssets().open(subPath);
                 OutputStream out = new FileOutputStream(outFile);
@@ -140,8 +192,10 @@ public class LauncherActivity extends Activity {
                 int len;
                 while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
                 in.close(); out.close();
+                count++;
             }
         }
+        return count;
     }
 
     private void updateConfigMotif(File configFile, String motifPath) throws Exception {
