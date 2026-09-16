@@ -15,6 +15,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import java.io.File;
+import org.ikemen_engine.ikemen_go.R;
 
 /**
  * PIASH MUGEN cinematic launcher.
@@ -41,7 +42,7 @@ public class LauncherActivity extends Activity {
 
         setContentView(R.layout.activity_launcher);
 
-        mSharedPrefs = getSharedPreferences("SDL", MODE_PRIVATE);
+        mSharedPrefs = getSharedPreferences(getString(R.string.prefs_key), MODE_PRIVATE);
 
         mStartButton = findViewById(R.id.btn_start_game);
         mFolderButton = findViewById(R.id.btn_select_folder);
