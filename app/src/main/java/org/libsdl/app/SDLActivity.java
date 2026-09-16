@@ -511,8 +511,6 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         mControllerOverlay = new ControllerOverlay(this);
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
         mLayout.addView(mControllerOverlay, lp);
-        // Touch layout editor: watch for Lua-triggered edit requests
-        mControllerOverlay.startEditTriggerWatch();
 
 //        setContentView(mLayout); // WHAT IT WAS
         setContentView(rootLayout);
