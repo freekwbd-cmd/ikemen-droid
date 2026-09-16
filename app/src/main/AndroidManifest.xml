@@ -99,10 +99,7 @@
             android:exported="true"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+
             <!-- Drop file event -->
             <!--
             <intent-filter>
@@ -111,6 +108,18 @@
                 <data android:mimeType="*/*" />
             </intent-filter>
             -->
+        </activity>
+        <activity android:name="org.libsdl.app.LauncherActivity"
+            android:label="PIASH MUGEN"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize|keyboardHidden"
+            android:exported="true"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 
