@@ -134,12 +134,27 @@ public class JoystickOverlay extends View {
 
         Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-        // Draw Background
-        p.setColor(0x44FFFFFF);
+        // Iron Yagami style: dark iron base with crimson glow ring
+        // Outer red glow
+        p.setColor(0x55FF2222);
+        canvas.drawCircle(centerX, centerY, radius * 1.02f, p);
+        // Dark iron base
+        p.setColor(0xDD1A1A1A);
         canvas.drawCircle(centerX, centerY, radius, p);
+        // Inner crimson ring accent
+        p.setStyle(Paint.Style.STROKE);
+        p.setStrokeWidth(radius * 0.06f);
+        p.setColor(0xFFFF3333);
+        canvas.drawCircle(centerX, centerY, radius * 0.88f, p);
+        p.setStyle(Paint.Style.FILL);
 
-        // Draw Stick Head
-        p.setColor(0x88FFFFFF);
-        canvas.drawCircle(stickX, stickY, radius / 2.0f, p);
+        // Stick head: dark metallic with red core
+        float knobR = radius / 2.0f;
+        p.setColor(0x66222222);
+        canvas.drawCircle(stickX, stickY, knobR * 1.08f, p);
+        p.setColor(0xFF2A2A2A);
+        canvas.drawCircle(stickX, stickY, knobR, p);
+        p.setColor(0xFFFF4444);
+        canvas.drawCircle(stickX, stickY, knobR * 0.45f, p);
     }
 }
