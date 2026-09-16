@@ -12,7 +12,13 @@ import android.provider.Settings;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import java.io.File;
 import java.io.InputStream;
@@ -73,6 +79,103 @@ public class LauncherActivity extends Activity {
         });
 
         refreshUi();
+        startCinematicAnimations();
+    }
+
+    /**
+     * Mind-blowing launcher animations:
+     * - Ken Burns slow zoom/pan on the key-art background
+     * - Breathing red glow at the bottom
+     * - Staggered overshoot entrance for the buttons
+     * - Pulsing START GAME button
+     */
+    private void startCinematicAnimations() {
+        // 1. Ken Burns: slow zoom in/out on background, alternate pan
+        final ImageView bg = findViewById(R.id.iv_bg);
+        if (bg != null) {
+            bg.post(new Runnable() {
+                @Override public void run() {
+                    ObjectAnimator zoomX = ObjectAnimator.ofFloat(bg, "scaleX", 1.0f, 1.12f);
+                    ObjectAnimator zoomY = ObjectAnimator.ofFloat(bg, "scaleY", 1.0f, 1.12f);
+                    ObjectAnimator panX = ObjectAnimator.ofFloat(bg, "translationX", 0f, -30f);
+                    AnimatorSet kenBurns = new AnimatorSet();
+                    kenBurns.playTogether(zoomX, zoomY, panX);
+                    kenBurns.setDuration(12000);
+                    kenBurns.setInterpolator(new AccelerateDecelerateInterpolator());
+                    // Ping-pong forever
+                    kenBurns.addListener(new android.animation.AnimatorListenerAdapter() {
+                        private boolean zoomed = false;
+                        @Override public void onAnimationEnd(android.animation.Animator animation) {
+                            zoomed = !zoomed;
+                            float s = zoomed ? 1.0f : 1.12f;
+                            float tx = zoomed ? 0f : -30f;
+                            ObjectAnimator zx = ObjectAnimator.ofFloat(bg, "scaleX", bg.getScaleX(), s);
+                            ObjectAnimator zy = ObjectAnimator.ofFloat(bg, "scaleY", bg.getScaleY(), s);
+                            ObjectAnimator px = ObjectAnimator.ofFloat(bg, "translationX", bg.getTranslationX(), tx);
+                            AnimatorSet back = new AnimatorSet();
+                            back.playTogether(zx, zy, px);
+                            back.setDuration(12000);
+                            back.setInterpolator(new AccelerateDecelerateInterpolator());
+                            back.addListener(this);
+                            back.start();
+                        }
+                    });
+                    kenBurns.start();
+                }
+            });
+        }
+
+        // 2. Breathing bottom glow
+        final View glow = findViewById(R.id.v_glow);
+        if (glow != null) {
+            ObjectAnimator breathe = ObjectAnimator.ofFloat(glow, "alpha", 0.35f, 1.0f);
+            breathe.setDuration(2200);
+            breathe.setRepeatMode(ValueAnimator.REVERSE);
+            breathe.setRepeatCount(ValueAnimator.INFINITE);
+            breathe.setInterpolator(new AccelerateDecelerateInterpolator());
+            breathe.start();
+        }
+
+        // 3. Staggered button entrance with overshoot
+        View[] buttons = {mFolderButton, mStartButton, mThemeButton};
+        for (int i = 0; i < buttons.length; i++) {
+            final View b = buttons[i];
+            b.setAlpha(0f);
+            b.setTranslationY(120f);
+            b.setScaleX(0.7f);
+            b.setScaleY(0.7f);
+            b.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setStartDelay(400 + i * 220)
+                .setDuration(700)
+                .setInterpolator(new OvershootInterpolator(1.4f))
+                .start();
+        }
+
+        // 4. Status text fade in
+        final View status = findViewById(R.id.layout_status);
+        if (status != null) {
+            status.setAlpha(0f);
+            status.animate().alpha(1f).setStartDelay(1100).setDuration(800).start();
+        }
+
+        // 5. START button heartbeat pulse (after entrance)
+        mStartButton.postDelayed(new Runnable() {
+            @Override public void run() {
+                ObjectAnimator pulseX = ObjectAnimator.ofFloat(mStartButton, "scaleX", 1f, 1.06f);
+                ObjectAnimator pulseY = ObjectAnimator.ofFloat(mStartButton, "scaleY", 1f, 1.06f);
+                AnimatorSet pulse = new AnimatorSet();
+                pulse.playTogether(pulseX, pulseY);
+                pulse.setDuration(900);
+                pulse.setRepeatMode(ValueAnimator.REVERSE);
+                pulse.setRepeatCount(ValueAnimator.INFINITE);
+                pulse.setInterpolator(new AccelerateDecelerateInterpolator());
+                pulse.start();
+            }
+        }, 1400);
     }
 
     @Override
