@@ -59,6 +59,9 @@
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
+    <!-- Required for WiFi LAN discovery (UDP broadcast beacons) -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+
     <!-- if you want to capture audio, uncomment this. -->
     <!-- <uses-permission android:name="android.permission.RECORD_AUDIO" /> -->
 

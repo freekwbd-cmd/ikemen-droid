@@ -223,6 +223,8 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
     // Main components
     protected static SDLActivity mSingleton;
+    // WiFi multicast lock for LAN game discovery (UDP beacons need this on Android).
+    private android.net.wifi.WifiManager.MulticastLock mMulticastLock = null;
     protected static SDLSurface mSurface;
     protected static DummyEdit mTextEdit;
     protected static boolean mScreenKeyboardShown;
@@ -363,6 +365,21 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         Log.v(TAG, "Model: " + Build.MODEL);
         Log.v(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
+
+        // Acquire WiFi multicast lock so UDP broadcast beacons (LAN discovery)
+        // are received even when the WiFi driver would otherwise filter them.
+        try {
+            android.net.wifi.WifiManager wifiManager =
+                (android.net.wifi.WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+            if (wifiManager != null) {
+                mMulticastLock = wifiManager.createMulticastLock("ikemen-lan-discovery");
+                mMulticastLock.setReferenceCounted(true);
+                mMulticastLock.acquire();
+                Log.v(TAG, "WiFi multicast lock acquired for LAN discovery");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to acquire WiFi multicast lock: " + e.getMessage());
+        }
 
         mSharedPrefs = this.getSharedPreferences(getString(R.string.prefs_key), MODE_PRIVATE);
 
@@ -891,6 +908,15 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     @Override
     protected void onDestroy() {
         Log.v(TAG, "onDestroy()");
+
+        if (mMulticastLock != null) {
+            try {
+                if (mMulticastLock.isHeld()) mMulticastLock.release();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to release WiFi multicast lock: " + e.getMessage());
+            }
+            mMulticastLock = null;
+        }
 
         if (mHIDDeviceManager != null) {
             HIDDeviceManager.release(mHIDDeviceManager);
