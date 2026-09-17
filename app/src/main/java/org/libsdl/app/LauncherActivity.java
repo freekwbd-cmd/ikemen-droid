@@ -149,8 +149,8 @@ public class LauncherActivity extends Activity {
                 .translationY(0f)
                 .scaleX(1f)
                 .scaleY(1f)
-                .setStartDelay(400 + i * 220)
-                .setDuration(700)
+                .setStartDelay(80 + i * 90)
+                .setDuration(380)
                 .setInterpolator(new OvershootInterpolator(1.4f))
                 .start();
         }
@@ -159,7 +159,7 @@ public class LauncherActivity extends Activity {
         final View status = findViewById(R.id.layout_status);
         if (status != null) {
             status.setAlpha(0f);
-            status.animate().alpha(1f).setStartDelay(1100).setDuration(800).start();
+            status.animate().alpha(1f).setStartDelay(250).setDuration(400).start();
         }
 
         // 5. START button heartbeat pulse (after entrance)
@@ -177,7 +177,7 @@ public class LauncherActivity extends Activity {
                 pulse.setInterpolator(new AccelerateDecelerateInterpolator());
                 pulse.start();
             }
-        }, 1400);
+        }, 700);
     }
 
     @Override

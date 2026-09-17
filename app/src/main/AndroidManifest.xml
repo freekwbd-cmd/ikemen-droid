@@ -114,7 +114,7 @@
             android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize|keyboardHidden"
             android:exported="true"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:theme="@style/LauncherTheme"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

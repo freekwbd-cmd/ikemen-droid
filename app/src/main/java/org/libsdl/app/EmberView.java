@@ -44,7 +44,9 @@ public class EmberView extends View {
 
     private void init() {
         paint.setStyle(Paint.Style.FILL);
-        setLayerType(LAYER_TYPE_SOFTWARE, null);
+        // Hardware rendering on purpose: embers are plain circles, no
+        // software-only paint effects. A software layer forced fullscreen
+        // CPU rasterization every frame (~30fps) which caused visible lag.
     }
 
     @Override
@@ -52,7 +54,8 @@ public class EmberView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         embers.clear();
         // Spawn embers across the width, biased to bottom half
-        for (int i = 0; i < 45; i++) {
+        // 30 is plenty for the effect; fewer = less per-frame work.
+        for (int i = 0; i < 30; i++) {
             embers.add(newEmber(w, h, true));
         }
     }

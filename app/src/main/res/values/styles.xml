@@ -4,4 +4,10 @@
     <style name="AppTheme" parent="android:Theme.NoTitleBar.Fullscreen">
         <!-- Customize your theme here. -->
     </style>
+
+    <!-- Launcher theme: branded windowBackground shows instantly at cold
+         start (before first frame), killing the black-screen delay feel. -->
+    <style name="LauncherTheme" parent="android:Theme.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">@drawable/launch_splash</item>
+    </style>
 </resources>

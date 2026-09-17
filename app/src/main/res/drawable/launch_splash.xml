@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cold-start splash: shown instantly by the window manager while the
+     process starts, so the app never shows a black screen. Dark blood-red
+     background with the PIASH logo centered. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="#0D0202" />
+    <item
+        android:drawable="@drawable/piash_logo"
+        android:gravity="center" />
+</layer-list>
