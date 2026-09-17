@@ -3,7 +3,9 @@
      process starts, so the app never shows a black screen. Dark blood-red
      background with the PIASH logo centered. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="#0D0202" />
+    <item>
+        <color android:color="#0D0202" />
+    </item>
     <item
         android:drawable="@drawable/piash_logo"
         android:gravity="center" />
