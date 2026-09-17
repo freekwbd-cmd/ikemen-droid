@@ -170,8 +170,10 @@ public class LauncherActivity extends Activity {
                 AnimatorSet pulse = new AnimatorSet();
                 pulse.playTogether(pulseX, pulseY);
                 pulse.setDuration(900);
-                pulse.setRepeatMode(ValueAnimator.REVERSE);
-                pulse.setRepeatCount(ValueAnimator.INFINITE);
+                pulseX.setRepeatMode(ValueAnimator.REVERSE);
+                pulseX.setRepeatCount(ValueAnimator.INFINITE);
+                pulseY.setRepeatMode(ValueAnimator.REVERSE);
+                pulseY.setRepeatCount(ValueAnimator.INFINITE);
                 pulse.setInterpolator(new AccelerateDecelerateInterpolator());
                 pulse.start();
             }

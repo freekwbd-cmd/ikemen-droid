@@ -126,7 +126,7 @@ public class EmberView extends View {
 
             // Respawn at bottom when off-screen
             if (e.y < -30) {
-                Ember n = newEmber(getWidth(), h, false);
+                Ember n = newEmber(getWidth(), (int) h, false);
                 e.x = n.x; e.y = n.y; e.size = n.size;
                 e.speed = n.speed; e.drift = n.drift;
                 e.maxAlpha = n.maxAlpha; e.color = n.color;
