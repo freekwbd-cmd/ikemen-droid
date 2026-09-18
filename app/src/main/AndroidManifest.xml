@@ -98,7 +98,6 @@
             android:windowSoftInputMode="adjustNothing"
             android:preferMinimalPostProcessing="true"
             android:exported="true"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             >
 
             <!-- Drop file event -->
