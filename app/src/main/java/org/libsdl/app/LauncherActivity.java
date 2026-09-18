@@ -218,6 +218,14 @@ public class LauncherActivity extends Activity {
 
     private void launchGame() {
         ensureThemeApplied();
+        // Instant tap feedback: the engine needs a few seconds to boot,
+        // so acknowledge the tap right away instead of a dead pause.
+        mStartButton.setEnabled(false);
+        mStartButton.setAlpha(0.4f);
+        if (mThemeStatus != null) {
+            mThemeStatus.setText("LOADING...");
+            mThemeStatus.setTextColor(0xFFFF5555);
+        }
         Intent intent = new Intent(this, SDLActivity.class);
         startActivity(intent);
     }
