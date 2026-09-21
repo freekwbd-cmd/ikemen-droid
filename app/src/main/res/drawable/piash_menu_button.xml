@@ -1,24 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Iron Yagami menu button: dark iron gradient, crimson stroke, red glow when pressed -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
             <corners android:radius="6dp" />
-            <solid android:color="#88220000" />
-            <stroke android:width="2dp" android:color="#FFFF3333" />
+            <gradient
+                android:angle="270"
+                android:startColor="#5A1414"
+                android:endColor="#260808" />
+            <stroke android:width="2dp" android:color="#FFFF4444" />
         </shape>
     </item>
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
             <corners android:radius="6dp" />
-            <solid android:color="#44111111" />
-            <stroke android:width="2dp" android:color="#44FF3333" />
+            <gradient
+                android:angle="270"
+                android:startColor="#1A0D0D"
+                android:endColor="#0D0606" />
+            <stroke android:width="2dp" android:color="#44991111" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="6dp" />
-            <solid android:color="#66111111" />
-            <stroke android:width="2dp" android:color="#AAFF2222" />
+            <gradient
+                android:angle="270"
+                android:startColor="#2A0D0D"
+                android:endColor="#120404" />
+            <stroke android:width="2dp" android:color="#FFFF2222" />
         </shape>
     </item>
 </selector>

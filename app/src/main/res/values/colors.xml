@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <!-- Iron Yagami palette: dark iron + crimson + ember glow -->
+    <color name="iy_iron_black">#0A0A0A</color>
+    <color name="iy_crimson">#FF2222</color>
+    <color name="iy_crimson_dark">#991111</color>
+    <color name="iy_ember">#FF5533</color>
+    <color name="iy_gold">#FFD700</color>
+    <color name="iy_text_red">#FF6666</color>
 </resources>

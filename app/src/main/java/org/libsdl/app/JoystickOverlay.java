@@ -134,28 +134,28 @@ public class JoystickOverlay extends View {
 
         Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-        // Modern Yagami: light, see-through, sleek crimson accents
+        // Iron Yagami: dark iron, crimson ring, ember glow core
         // Base: very transparent so the game shows through
-        p.setColor(0x33222222);
+        p.setColor(0x33101010);
         canvas.drawCircle(centerX, centerY, radius, p);
         // Thin sleek crimson ring
         p.setStyle(Paint.Style.STROKE);
         p.setStrokeWidth(radius * 0.035f);
-        p.setColor(0xCCFF3344);
+        p.setColor(0xCCFF2222);
         canvas.drawCircle(centerX, centerY, radius * 0.97f, p);
         // Subtle inner ring
         p.setStrokeWidth(radius * 0.02f);
-        p.setColor(0x66FF3344);
+        p.setColor(0x66FF2222);
         canvas.drawCircle(centerX, centerY, radius * 0.55f, p);
         p.setStyle(Paint.Style.FILL);
 
-        // Knob: light translucent with red glow core (see-through)
+        // Knob: dark iron with red glow core (see-through)
         float knobR = radius * 0.42f;
-        p.setColor(0x55FF3344);
+        p.setColor(0x55FF2222);
         canvas.drawCircle(stickX, stickY, knobR * 1.15f, p);
-        p.setColor(0x99222222);
+        p.setColor(0x99111111);
         canvas.drawCircle(stickX, stickY, knobR, p);
-        p.setColor(0xFFFF5566);
+        p.setColor(0xFFFF2222);
         canvas.drawCircle(stickX, stickY, knobR * 0.35f, p);
     }
 }

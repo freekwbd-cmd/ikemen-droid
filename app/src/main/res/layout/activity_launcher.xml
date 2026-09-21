@@ -89,6 +89,17 @@
             android:background="@drawable/piash_menu_button" />
     </LinearLayout>
 
+    <!-- Iron Yagami logo, top center -->
+    <ImageView
+        android:id="@+id/iv_logo"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="64dp"
+        android:src="@drawable/piash_logo"
+        android:contentDescription="Iron Yagami logo" />
+
     <!-- Folder path + theme status, above the control bar -->
     <LinearLayout
         android:id="@+id/layout_status"
