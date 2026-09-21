@@ -268,17 +268,20 @@ public class LauncherActivity extends Activity {
         }
     }
 
+    // NOTE: the engine (Ikemen GO) reads Motif from the [Config] section
+    // (see src/config.go: `} ini:"Config"`). Writing it under [Options]
+    // is silently ignored by the engine.
     private String readConfigMotif(File configFile) throws Exception {
         if (!configFile.exists()) return null;
         BufferedReader br = new BufferedReader(new FileReader(configFile));
         String line;
-        boolean inOptions = false;
+        boolean inConfig = false;
         try {
             while ((line = br.readLine()) != null) {
                 String t = line.trim();
                 if (t.startsWith("[") && t.endsWith("]")) {
-                    inOptions = t.equalsIgnoreCase("[Options]");
-                } else if (inOptions && t.toLowerCase().startsWith("motif")) {
+                    inConfig = t.equalsIgnoreCase("[Config]");
+                } else if (inConfig && t.toLowerCase().startsWith("motif")) {
                     int eq = t.indexOf('=');
                     if (eq >= 0) return t.substring(eq + 1).trim();
                 }
@@ -313,7 +316,7 @@ public class LauncherActivity extends Activity {
 
     private void updateConfigMotif(File configFile, String motifPath) throws Exception {
         List<String> lines = new ArrayList<>();
-        boolean inOptions = false;
+        boolean inConfig = false;
         boolean motifSet = false;
         if (configFile.exists()) {
             BufferedReader br = new BufferedReader(new FileReader(configFile));
@@ -321,31 +324,35 @@ public class LauncherActivity extends Activity {
             while ((line = br.readLine()) != null) {
                 String t = line.trim();
                 if (t.startsWith("[") && t.endsWith("]")) {
-                    inOptions = t.equalsIgnoreCase("[Options]");
+                    inConfig = t.equalsIgnoreCase("[Config]");
                 }
-                if (inOptions && t.toLowerCase().startsWith("motif")) {
+                if (inConfig && t.toLowerCase().startsWith("motif")) {
                     int eq = line.indexOf('=');
                     if (eq >= 0) {
                         line = line.substring(0, eq + 1) + " " + motifPath;
                         motifSet = true;
                     }
+                } else if (!inConfig && t.toLowerCase().startsWith("motif")) {
+                    // Stale Motif under another section (e.g. [Options]) is
+                    // ignored by the engine; neutralize it to avoid confusion.
+                    if (!t.startsWith(";")) line = "; " + line;
                 }
                 lines.add(line);
             }
             br.close();
         }
         if (!motifSet) {
-            // Add [Options] section or append Motif
-            boolean hasOptions = false;
+            // Add [Config] section or append Motif
+            boolean hasConfig = false;
             for (int i = 0; i < lines.size(); i++) {
-                if (lines.get(i).trim().equalsIgnoreCase("[Options]")) {
-                    hasOptions = true;
+                if (lines.get(i).trim().equalsIgnoreCase("[Config]")) {
+                    hasConfig = true;
                     lines.add(i + 1, "Motif = " + motifPath);
                     break;
                 }
             }
-            if (!hasOptions) {
-                lines.add("[Options]");
+            if (!hasConfig) {
+                lines.add("[Config]");
                 lines.add("Motif = " + motifPath);
             }
         }
