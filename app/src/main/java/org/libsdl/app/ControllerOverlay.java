@@ -86,7 +86,8 @@ public class ControllerOverlay extends RelativeLayout {
     }
 
     private int leftJoyPointerId = -1;
-    private int rightJoyPointerId = -1;
+    // Right analog stick removed (2026-09-21): it was invisible yet touch-active
+    // and overlapped the D/W buttons, swallowing their taps as RS axis events.
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -102,8 +103,6 @@ public class ControllerOverlay extends RelativeLayout {
             // Check Joysticks first (circular capture with configurable leniency)
             if (isStickAt(findViewById(R.id.left_analog), x, y)) {
                 leftJoyPointerId = pId;
-            } else if (isStickAt(findViewById(R.id.right_analog), x, y)) {
-                rightJoyPointerId = pId;
             } else {
                 // If not a stick, it's a button/dpad
                 updatePointer(pId, getButtonsAt(x, y));
@@ -118,8 +117,6 @@ public class ControllerOverlay extends RelativeLayout {
 
                 if (movePId == leftJoyPointerId) {
                     updateJoystickLogic(findViewById(R.id.left_analog), mx, my);
-                } else if (movePId == rightJoyPointerId) {
-                    updateJoystickLogic(findViewById(R.id.right_analog), mx, my);
                 } else {
                     Set<Integer> currentButtons = getButtonsAt(mx, my);
                     Set<Integer> lastButtons = pointerStates.get(movePId);
@@ -134,9 +131,6 @@ public class ControllerOverlay extends RelativeLayout {
             if (pId == leftJoyPointerId) {
                 resetJoystick(findViewById(R.id.left_analog));
                 leftJoyPointerId = -1;
-            } else if (pId == rightJoyPointerId) {
-                resetJoystick(findViewById(R.id.right_analog));
-                rightJoyPointerId = -1;
             } else {
                 releasePointer(pId);
             }
@@ -402,13 +396,9 @@ public class ControllerOverlay extends RelativeLayout {
         SDLControllerManager.nativeRemoveJoystick(virtualDeviceId);
         ensureJoystickAlive();
         applyStickConfig(findViewById(R.id.left_analog));
-        applyStickConfig(findViewById(R.id.right_analog));
-        // Initialize the joysticks
+        // Initialize the joysticks (left stick only; right stick removed)
         JoystickOverlay ls = findViewById(R.id.left_analog);
         ls.setAttrs(virtualDeviceId, 0, 1);
-
-        JoystickOverlay rs = findViewById(R.id.right_analog);
-        rs.setAttrs(virtualDeviceId, 2, 3);
 
         for (int i = 0; i < 6; i++) {
             SDLControllerManager.onNativeJoy(virtualDeviceId, i, 0.00390625f);
