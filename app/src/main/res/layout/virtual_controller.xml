@@ -112,15 +112,7 @@
             android:textStyle="bold"
             android:fontFamily="@font/yagami" />
 
-    <org.libsdl.app.JoystickOverlay
-        android:id="@+id/right_analog"
-        android:layout_width="125dp"
-        android:layout_height="125dp"
-        android:layout_below="@id/button_grid"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="34dp"
-        android:layout_marginTop="-120dp"
-        app:axisX="2" app:axisY="3" />
+<!-- right_analog removed 2026-09-21: invisible stick overlapped D/W buttons -->
 
     <LinearLayout
         android:layout_width="wrap_content"
