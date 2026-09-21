@@ -787,6 +787,83 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         }).start();
     }
 
+    // Virtual touch-controller GUID (Xbox 360 Controller VID 045E PID 028E,
+    // same formula as the engine's GetJoystickGUID).
+    private static final String VIRTUAL_JOY_GUID = "030000005e0400008e020000ff7f0000";
+
+    // Seed permanent default touch mappings for [Joystick_P1].
+    // - Fresh/reset game folder (no [Joystick_P1]): writes full defaults so the
+    //   touch buttons work without ever opening the joystick config screen.
+    // - Existing install hit by the old right-stick overlap bug (d = RS_Y-,
+    //   w = Not used on the virtual controller): heals d -> LB, w -> LT.
+    // Never touches other sections or real (non-virtual) controllers.
+    private void seedDefaultJoystickConfig() {
+        try {
+            java.io.File cfg = new java.io.File(mBasePath, "save/config.ini");
+            java.util.List<String> lines = new java.util.ArrayList<>();
+            if (cfg.isFile()) {
+                try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(cfg))) {
+                    String l;
+                    while ((l = br.readLine()) != null) lines.add(l);
+                }
+            }
+            int secStart = -1, secEnd = lines.size();
+            for (int i = 0; i < lines.size(); i++) {
+                String t = lines.get(i).trim();
+                if (t.equalsIgnoreCase("[Joystick_P1]")) secStart = i;
+                else if (secStart != -1 && t.startsWith("[") && t.endsWith("]")) { secEnd = i; break; }
+            }
+            if (secStart == -1) {
+                // No section: append full defaults.
+                if (!lines.isEmpty()) lines.add("");
+                lines.add("[Joystick_P1]");
+                lines.add("Joystick = 0");
+                lines.add("GUID     = " + VIRTUAL_JOY_GUID);
+                lines.add("up       = LS_Y-");
+                lines.add("down     = LS_Y+");
+                lines.add("left     = LS_X-");
+                lines.add("right    = LS_X+");
+                lines.add("a        = A");
+                lines.add("b        = B");
+                lines.add("c        = RT");
+                lines.add("x        = X");
+                lines.add("y        = Y");
+                lines.add("z        = RB");
+                lines.add("start    = START");
+                lines.add("d        = LB");
+                lines.add("w        = LT");
+                lines.add("menu     = BACK");
+                lines.add("RumbleOn = 0");
+            } else {
+                // Section exists: only heal the virtual controller's broken d/w.
+                boolean isVirtual = false;
+                for (int i = secStart; i < secEnd; i++) {
+                    if (lines.get(i).trim().toLowerCase().startsWith("guid") &&
+                        lines.get(i).contains(VIRTUAL_JOY_GUID)) { isVirtual = true; break; }
+                }
+                if (isVirtual) {
+                    for (int i = secStart; i < secEnd; i++) {
+                        String t = lines.get(i).trim();
+                        if (t.toLowerCase().startsWith("d ") || t.toLowerCase().startsWith("d=") || t.toLowerCase().startsWith("d\t")) {
+                            if (t.equalsIgnoreCase("d = RS_Y-") || t.equalsIgnoreCase("d=RS_Y-"))
+                                lines.set(i, "d        = LB");
+                        } else if (t.toLowerCase().startsWith("w ") || t.toLowerCase().startsWith("w=") || t.toLowerCase().startsWith("w\t")) {
+                            if (t.toLowerCase().contains("not used"))
+                                lines.set(i, "w        = LT");
+                        }
+                    }
+                }
+            }
+            cfg.getParentFile().mkdirs();
+            try (java.io.FileWriter fw = new java.io.FileWriter(cfg, false)) {
+                for (String l : lines) { fw.write(l); fw.write("\n"); }
+            }
+            android.util.Log.i("SDLActivity", "Joystick_P1 defaults ensured");
+        } catch (Exception e) {
+            android.util.Log.w("SDLActivity", "joystick seed failed: " + e);
+        }
+    }
+
     private void onSDLReady() {
         // Pass the exact path we just extracted to
         mBasePath = mSharedPrefs.getString(getString(R.string.game_folder_key), "");
@@ -795,6 +872,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         if (mBasePath.isEmpty()) {
             mBasePath = getExternalFilesDir(null).getAbsolutePath();
         }
+        seedDefaultJoystickConfig();
         SDLActivity.nativeOnSDLReady(mBasePath);
     }
 
